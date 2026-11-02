@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Korxona Tahlil Paneli</title>
+  <!-- Chart.js kutubxonasi -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #3b82f6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --sidebar-bg: #1e293b;
+      --sidebar-text: #e2e8f0;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #60a5fa;
+      --sidebar-bg: #0b1120;
+      --sidebar-text: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    aside {
+      width: 240px;
+      background-color: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      padding: 24px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-links {
+      list-style: none;
+      padding: 16px 8px;
+      flex: 1;
+    }
+
+    .nav-item {
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    .nav-item.active, .nav-item:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    header {
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .theme-toggle-btn {
+      padding: 8px 16px;
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .content {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .card-title {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .card-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .text-success { color: var(--success); }
+    .text-danger { color: var(--danger); }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .charts-grid { grid-template-columns: 1fr; }
+      aside { width: 70px; }
+      .brand, .nav-text { display: none; }
+    }
+
+    .table-container {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search-input, .select-filter {
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      border-radius: 6px;
+      outline: none;
+    }
+
+    .search-input { width: 220px; }
+     .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-add {
+      padding: 8px 16px;
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-export {
+      padding: 8px 14px;
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .btn-delete {
+      background: none;
+      border: none;
+      color: var(--danger);
+      cursor: pointer;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .btn-delete:hover {
+      background-color: rgba(239, 68, 68, 0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.875rem;
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-in { background-color: rgba(16, 185, 129, 0.15); color: var(--success); }
+    .badge-out { background-color: rgba(239, 68, 68, 0.15); color: var(--danger); }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .modal.active { display: flex; }
+
+    .modal-content {
+      background-color: var(--card-bg);
+      padding: 24px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid var(--border);
+    }
+
+    .modal-content h3 { margin-bottom: 16px; }
+
+    .form-group {
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group input, .form-group select {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      border-radius: 6px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <aside>
+    <div class="brand">📊 Tahlil tizimi</div>
+    <ul class="nav-links">
+      <li class="nav-item active"><span class="nav-text">Asosiy panel</span></li>
+      <li class="nav-item"><span class="nav-text">Hisobotlar</span></li>
+      <li class="nav-item"><span class="nav-text">Mijozlar</span></li>
+      <li class="nav-item"><span class="nav-text">Sozlamalar</span></li>
+    </ul>
+  </aside>
+
+  <main>
+    <header>
+      <h2>Umumiy ko‘rsatkichlar</h2>
+      <button class="theme-toggle-btn" id="themeToggleBtn">🌙 Tungi rejim</button>
+    </header>
+
+    <div class="content">
+      <!-- KPI -->
+      <section class="kpi-grid">
+        <div class="card">
+          <div class="card-title">Jami Daromad</div>
+          <div class="card-value text-success" id="kpiIncome">0 so‘m</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Jami Xarajat</div>
+          <div class="card-value text-danger" id="kpiExpense">0 so‘m</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Sof Foyda</div>
+          <div class="card-value" id="kpiProfit">0 so‘m</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Tranzaksiyalar soni</div>
+          <div class="card-value" id="kpiCount">0 ta</div>
+        </div>
+      </section>
+
+      <!-- Grafiklar -->
+      <section class="charts-grid">
+        <div class="card">
+          <div class="card-title">Haqiqiy Dinamika (Kirim / Chiqim)</div>
+          <canvas id="barChart"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-title">Balans nisbati</div>
+          <canvas id="pieChart"></canvas>
+        </div>
+      </section>
+
+      <!-- Jadval va Boshqaruv -->
+      <section class="table-container">
+        <div class="table-header">
+          <div class="filter-group">
+            <input type="text" class="search-input" id="searchInput" placeholder="Nomi bo‘yicha qidiruv...">
+            <select class="select-filter" id="typeFilter">
+              <option value="all">Barchasi</option>
+              <option value="in">Faqat Kirim</option>
+              <option value="out">Faqat Chiqim</option>
+            </select>
+          </div>
+          <div class="btn-group">
+            <button class="btn-export" id="exportBtn">📥 Excel (CSV)</button>
+            <button class="btn-add" id="openModalBtn">+ Yangi operatsiya</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Operatsiya nomi</th>
+              <th>Tur</th>
+              <th>Miqdor (so‘m)</th>
+              <th>Sana</th>
+              <th style="text-align: right;">Amallar</th>
+            </tr>
+          </thead>
+          <tbody id="transactionBody"></tbody>
+        </table>
+      </section>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <h3>Yangi operatsiya qo‘shish</h3>
+      <form id="transactionForm">
+        <div class="form-group">
+          <label>Nomi</label>
+          <input type="text" id="txName" required placeholder="Masalan: Server xarajati">
+        </div>
+        <div class="form-group">
+          <label>Turi</label>
+          <select id="txType">
+            <option value="in">Kirim (Daromad)</option>
+            <option value="out">Chiqim (Xarajat)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Miqdori (so‘m)</label>
+          <input type="number" id="txAmount" required placeholder="100000">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="theme-toggle-btn" id="closeModalBtn">Bekor qilish</button>
+          <button type="submit" class="btn-add">Saqlash</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    
+    const defaultData = [
+      { id: 101, title: 'Mijoz to‘lovi (Loyixa A)', type: 'in', amount: 12500000, date: '2026-03-25' },
+      { id: 102, title: 'Server ijarasi', type: 'out', amount: 850000, date: '2026-03-26' },
+      { id: 103, title: 'Konsalting xizmati', type: 'in', amount: 4200000, date: '2026-03-27' },
+      { id: 104, title: 'Ofis interneti', type: 'out', amount: 450000, date: '2026-03-28' },
+    ];
+
+    let transactions = JSON.parse(localStorage.getItem('dashboard_txs')) || defaultData;
+
+    function saveTransactions() {
+      localStorage.setItem('dashboard_txs', JSON.stringify(transactions));
+    }
+
+   
+    const themeBtn = document.getElementById('themeToggleBtn');
+    let currentTheme = localStorage.getItem('dashboard_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    themeBtn.textContent = currentTheme === 'dark' ? '☀️ Kunduzgi rejim' : '🌙 Tungi rejim';
+
+    themeBtn.addEventListener('click', () => {
+      currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      localStorage.setItem('dashboard_theme', currentTheme);
+      themeBtn.textContent = currentTheme === 'dark' ? '☀️ Kunduzgi rejim' : '🌙 Tungi rejim';
+    });
+
+   
+    const ctxBar = document.getElementById('barChart').getContext('2d');
+    const barChart = new Chart(ctxBar, {
+      type: 'bar',
+      data: {
+        labels: ['Jami Statistika'],
+        datasets: [
+          { label: 'Kirim', data: [0], backgroundColor: '#10b981' },
+          { label: 'Chiqim', data: [0], backgroundColor: '#ef4444' }
+        ]
+      },
+      options: { responsive: true }
+    });
+
+    const ctxPie = document.getElementById('pieChart').getContext('2d');
+    const pieChart = new Chart(ctxPie, {
+      type: 'doughnut',
+      data: {
+        labels: ['Kirim', 'Chiqim'],
+        datasets: [{
+          data: [1, 1],
+          backgroundColor:['#10b981', '#ef4444']
+          }]
+ },
+      options: { responsive: true }
+    });
+
+    // 4. DELETE FUNCTION
+    function deleteTransaction(id) {
+      if (confirm("Haqiqatan ham bu operatsiyani o‘chirmoqchimisiz?")) {
+        transactions = transactions.filter(t => t.id !== id);
+        saveTransactions();
+        applyFilterAndRender();
+      }
+    }
+
+    // 5. RENDER APP
+    function renderTable(items) {
+      const tbody = document.getElementById('transactionBody');
+      tbody.innerHTML = '';
+
+      if (items.length === 0) {
+        tbody.innerHTML = <tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Ma'lumot topilmadi</td></tr>;
+        return;
+      }
+
+      items.forEach(tx => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>#${tx.id}</td>
+          <td>${tx.title}</td>
+          <td><span class="badge ${tx.type === 'in' ? 'badge-in' : 'badge-out'}">${tx.type === 'in' ? 'Kirim' : 'Chiqim'}</span></td>
+          <td style="font-weight: 600;">${tx.amount.toLocaleString()} so‘m</td>
+          <td>${tx.date}</td>
+          <td style="text-align: right;">
+            <button class="btn-delete" onclick="deleteTransaction(${tx.id})">O‘chirish</button>
+          </td>
+       ` ;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateKPIAndCharts() {
+      let totalIn = 0;
+      let totalOut = 0;
+
+      transactions.forEach(t => {
+        if (t.type === 'in') totalIn += t.amount;
+        if (t.type === 'out') totalOut += t.amount;
+      });
+
+      document.getElementById('kpiIncome').textContent = totalIn.toLocaleString() + " so‘m";
+      document.getElementById('kpiExpense').textContent = totalOut.toLocaleString() + " so‘m";
+      const net = totalIn - totalOut;
+      const profitEl = document.getElementById('kpiProfit');
+      profitEl.textContent = net.toLocaleString() + " so‘m";
+      profitEl.className = 'card-value ' + (net >= 0 ? 'text-success' : 'text-danger');
+      document.getElementById('kpiCount').textContent = transactions.length + " ta";
+
+
+      pieChart.data.datasets[0].data = [totalIn,totalOut];
+      pieChart.update();
+
+      barChart.data.datasets[0].data = [totalIn];
+      barChart.data.datasets[1].data = [totalOut];
+      barChart.update();
+    }
+
+    function applyFilterAndRender() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const type = document.getElementById('typeFilter').value;
+
+      const filtered = transactions.filter(t => {
+        const matchesSearch = t.title.toLowerCase().includes(search);
+        const matchesType = (type === 'all') || (t.type === type);
+        return matchesSearch && matchesType;
+      });
+
+      renderTable(filtered);
+      updateKPIAndCharts();
+    }
+
+    // 6. EVENTS (SEARCH, FILTER, EXPORT)
+    document.getElementById('searchInput').addEventListener('input', applyFilterAndRender);
+    document.getElementById('typeFilter').addEventListener('change', applyFilterAndRender);
+
+    // CSV Eksport
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      let csv = 'ID,Nomi,Turi,Miqdori,Sana\n';
+      transactions.forEach(t => {
+        csv += `${t.id},"${t.title}",${t.type === 'in' ? 'Kirim' : 'Chiqim'},${t.amount},${t.date}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `tahlil_hisobot_${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+    });
+
+    // 7. MODAL LOGIC
+    const modal = document.getElementById('modal');
+    const openBtn = document.getElementById('openModalBtn');
+    const closeBtn = document.getElementById('closeModalBtn');
+    const form = document.getElementById('transactionForm');
+
+    openBtn.onclick = () => modal.classList.add('active');
+    closeBtn.onclick = () => modal.classList.remove('active');
+
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const title = document.getElementById('txName').value;
+      const type = document.getElementById('txType').value;
+      const amount = parseFloat(document.getElementById('txAmount').value);
+      const date = new Date().toISOString().split('T')[0];
+
+      const newTx = {
+        id: Math.floor(100 + Math.random() * 900),
+        title,
+        type,
+        amount,
+        date
+      };
+
+      transactions.unshift(newTx);
+      saveTransactions();
+      applyFilterAndRender();
+
+      form.reset();
+      modal.classList.remove('active');
+    };
+
+    // Boshlang'ich render
+    applyFilterAndRender();
+  </script>
+</body>
+</html>
