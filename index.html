@@ -1,599 +1,235 @@
+
 <!DOCTYPE html>
-<html lang="uz" data-theme="light">
+<html lang="uz">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Korxona Tahlil Paneli</title>
-  <!-- Chart.js kutubxonasi -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    :root {
-      --bg: #f4f6f9;
-      --card-bg: #ffffff;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --primary: #3b82f6;
-      --success: #10b981;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --sidebar-bg: #1e293b;
-      --sidebar-text: #e2e8f0;
-    }
-
-    [data-theme="dark"] {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: #334155;
-      --primary: #60a5fa;
-      --sidebar-bg: #0b1120;
-      --sidebar-text: #cbd5e1;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-    }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      display: flex;
-      min-height: 100vh;
-    }
-
-    aside {
-      width: 240px;
-      background-color: var(--sidebar-bg);
-      color: var(--sidebar-text);
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-    }
-
-    .brand {
-      padding: 24px;
-      font-size: 1.25rem;
-      font-weight: 700;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .nav-links {
-      list-style: none;
-      padding: 16px 8px;
-      flex: 1;
-    }
-
-    .nav-item {
-      padding: 12px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-bottom: 4px;
-      font-weight: 500;
-    }
-
-    .nav-item.active, .nav-item:hover {
-      background-color: rgba(255, 255, 255, 0.08);
-      color: #fff;
-    }
-
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-    }
-
-    header {
-      background-color: var(--card-bg);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .theme-toggle-btn {
-      padding: 8px 16px;
-      background-color: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    .content {
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-    }
-
-    .card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-    }
-
-    .card-title {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-
-    .card-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
-
-    .text-success { color: var(--success); }
-    .text-danger { color: var(--danger); }
-
-    .charts-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 16px;
-    }
-
-    @media (max-width: 900px) {
-      .charts-grid { grid-template-columns: 1fr; }
-      aside { width: 70px; }
-      .brand, .nav-text { display: none; }
-    }
-
-    .table-container {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-    }
-
-    .table-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .filter-group {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .search-input, .select-filter {
-      padding: 8px 14px;
-      border: 1px solid var(--border);
-      background-color: var(--bg);
-      color: var(--text);
-      border-radius: 6px;
-      outline: none;
-    }
-
-    .search-input { width: 220px; }
-     .btn-group {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn-add {
-      padding: 8px 16px;
-      background-color: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .btn-export {
-      padding: 8px 14px;
-      background-color: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    .btn-delete {
-      background: none;
-      border: none;
-      color: var(--danger);
-      cursor: pointer;
-      font-weight: 600;
-      padding: 4px 8px;
-      border-radius: 4px;
-    }
-
-    .btn-delete:hover {
-      background-color: rgba(239, 68, 68, 0.1);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
-
-    th, td {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.875rem;
-    }
-
-    th {
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .badge-in { background-color: rgba(16, 185, 129, 0.15); color: var(--success); }
-    .badge-out { background-color: rgba(239, 68, 68, 0.15); color: var(--danger); }
-
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background-color: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 100;
-    }
-
-    .modal.active { display: flex; }
-
-    .modal-content {
-      background-color: var(--card-bg);
-      padding: 24px;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 400px;
-      border: 1px solid var(--border);
-    }
-
-    .modal-content h3 { margin-bottom: 16px; }
-
-    .form-group {
-      margin-bottom: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .form-group input, .form-group select {
-      padding: 8px 12px;
-      border: 1px solid var(--border);
-      background-color: var(--bg);
-      color: var(--text);
-      border-radius: 6px;
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 20px;
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Korxona tahlil paneli — eksport, foyda, mijozlar</title>
+<style>
+:root{--bg:#f3f4f7;--card:#fff;--ink:#16202f;--mute:#617086;--line:#dde2ea;--in:#1f8a5b;--out:#d1503b;--acc:#1d3557;--amb:#e9a23b;--accink:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1520;--card:#152031;--ink:#e7edf6;--mute:#93a2b8;--line:#25354b;--in:#43c48a;--out:#f07a64;--acc:#6fa3ef;--amb:#f2b455;--accink:#0d1520}}
+:root[data-theme="dark"]{--bg:#0d1520;--card:#152031;--ink:#e7edf6;--mute:#93a2b8;--line:#25354b;--in:#43c48a;--out:#f07a64;--acc:#6fa3ef;--amb:#f2b455;--accink:#0d1520}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:1040px;margin:0 auto;padding:18px 14px 48px}
+h1{font:700 26px/1.2 Georgia,serif;margin:0}
+h2{font:700 17px/1.3 Georgia,serif;margin:0 0 12px}
+.sub{color:var(--mute);margin:4px 0 14px}
+.top{display:flex;gap:12px;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;margin-bottom:6px}
+.ctl{display:flex;gap:8px;flex-wrap:wrap}
+select,button{font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);cursor:pointer}
+button.p{background:var(--acc);color:var(--accink);border:0;font-weight:600}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.grid{display:grid;gap:12px}
+.kpi{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.two{grid-template-columns:repeat(auto-fit,minmax(310px,1fr));margin-top:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.big{font:700 22px/1.25 Georgia,serif}.lbl{color:var(--mute);font-size:14px}
+.in{color:var(--in)}.out{color:var(--out)}
+.row{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.bar{height:9px;border-radius:5px;background:var(--line);overflow:hidden;margin:3px 0 10px}
+.bar i{display:block;height:100%;background:var(--acc)}.bar i.o{background:var(--out)}.bar i.a{background:var(--amb)}
+.rb{display:block;width:100%;text-align:left;background:none;border:0;padding:0;color:inherit}
+.rb.on .nm{font-weight:700;color:var(--acc)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:7px 5px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--mute);font-weight:600;font-size:14px}.r{text-align:right}
+.scroll{overflow-x:auto}
+.tag{display:inline-block;padding:1px 9px;border-radius:99px;font-size:13px;border:1px solid currentColor}
+.tip{padding:10px 12px;border-left:4px solid var(--acc);background:var(--bg);border-radius:6px;margin:0 0 9px;font-size:15px}
+.tip.w{border-color:var(--out)}.tip.g{border-color:var(--in)}
+.q{font-style:italic;color:var(--mute);margin:0 0 8px;font-size:15px}
+svg{width:100%;height:auto;display:block}
+.note{font-size:13px;color:var(--mute);margin-top:6px}
+@media print{.ctl{display:none}body{background:#fff}}
+[hidden]{display:none!important}
+#auth{min-height:85vh;display:grid;place-items:center;padding:16px}
+.box{width:100%;max-width:400px}
+.box h1{margin-bottom:4px}
+.tabs{display:flex;gap:8px;margin-bottom:14px}.tabs button{flex:1}.tabs .on{background:var(--acc);color:var(--accink);border:0;font-weight:600}
+#auth label{display:block;margin-bottom:10px;font-size:14px;color:var(--mute)}
+#auth input{width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);margin-top:4px}
+#auth .p{width:100%}.err{color:var(--out);min-height:1.4em;font-size:14px;margin-bottom:8px}
+</style>
 </head>
 <body>
+<section id="auth"><div class="box card">
+<h1>Korxona tahlil paneli</h1><p class="sub">Korxonangiz hisobiga kiring yoki yangi hisob yarating.</p>
+<div class="tabs"><button type="button" id="tIn" class="on" onclick="setMode('in')">Kirish</button><button type="button" id="tUp" onclick="setMode('up')">Roʻyxatdan oʻtish</button></div>
+<form id="af">
+<label class="up">Korxona nomi<input id="an" autocomplete="organization" placeholder="Masalan: Sharq Tekstil MChJ"></label>
+<label>Login<input id="al" autocomplete="username" required></label>
+<label>Parol<input id="ap" type="password" autocomplete="current-password" required></label>
+<label class="up">Parolni takrorlang<input id="ap2" type="password" autocomplete="new-password"></label>
+<div id="amsg" class="err" role="alert"></div>
+<button class="p" id="asub" type="submit">Kirish</button></form>
+<p class="note"></p>
+</div></section>
+<main id="app" hidden>
+<div class="top">
+<div><h1 id="cname">Korxona tahlil paneli</h1><p class="sub" style="margin-bottom:0">Eksport savdosi, foyda, bojxona va kommunal xarajatlar, mijoz fikrlari — bir joyda.</p></div>
+<div class="ctl"><select id="sel" aria-label="Davlat tanlash"></select><button class="p" onclick="window.print()">Hisobotni chop etish</button><button onclick="logout()">Chiqish</button></div>
+</div>
+<p class="note" style="margin:0 0 12px">2026 yil, namuna (demo) maʼlumotlar. Summalar million AQSh dollarida.</p>
 
-  <aside>
-    <div class="brand">📊 Tahlil tizimi</div>
-    <ul class="nav-links">
-      <li class="nav-item active"><span class="nav-text">Asosiy panel</span></li>
-      <li class="nav-item"><span class="nav-text">Hisobotlar</span></li>
-      <li class="nav-item"><span class="nav-text">Mijozlar</span></li>
-      <li class="nav-item"><span class="nav-text">Sozlamalar</span></li>
-    </ul>
-  </aside>
+<section class="grid kpi" id="kpi"></section>
 
-  <main>
-    <header>
-      <h2>Umumiy ko‘rsatkichlar</h2>
-      <button class="theme-toggle-btn" id="themeToggleBtn">🌙 Tungi rejim</button>
-    </header>
+<section class="grid two">
+<div class="card"><h2>Oylik tushum, xarajat va foyda</h2><div id="mon"></div><div class="lbl"><span class="in">■</span> tushum &nbsp;<span class="out">■</span> xarajat &nbsp;<span style="color:var(--amb)">●</span> foyda</div></div>
+<div class="card"><h2>AI tahlil va tavsiyalar</h2><div id="ai"></div></div>
+</section>
 
-    <div class="content">
-      <!-- KPI -->
-      <section class="kpi-grid">
-        <div class="card">
-          <div class="card-title">Jami Daromad</div>
-          <div class="card-value text-success" id="kpiIncome">0 so‘m</div>
-        </div>
-        <div class="card">
-          <div class="card-title">Jami Xarajat</div>
-          <div class="card-value text-danger" id="kpiExpense">0 so‘m</div>
-        </div>
-        <div class="card">
-          <div class="card-title">Sof Foyda</div>
-          <div class="card-value" id="kpiProfit">0 so‘m</div>
-        </div>
-        <div class="card">
-          <div class="card-title">Tranzaksiyalar soni</div>
-          <div class="card-value" id="kpiCount">0 ta</div>
-        </div>
-      </section>
+<section class="grid two">
+<div class="card"><h2>Qaysi davlatda qancha sotilyapti</h2><div id="cty"></div><div class="note">Davlatni bosib, butun panelni shu davlat boʻyicha koʻring.</div></div>
+<div class="card"><h2>Mahsulotlar boʻyicha sotuv</h2><div id="prd"></div></div>
+</section>
 
-      <!-- Grafiklar -->
-      <section class="charts-grid">
-        <div class="card">
-          <div class="card-title">Haqiqiy Dinamika (Kirim / Chiqim)</div>
-          <canvas id="barChart"></canvas>
-        </div>
-        <div class="card">
-          <div class="card-title">Balans nisbati</div>
-          <canvas id="pieChart"></canvas>
-        </div>
-      </section>
+<section class="grid two">
+<div class="card"><h2>Korxonaning bozordagi ulushi</h2><div id="shr"></div><div class="note">Ulush = korxona sotuvi / davlatdagi shu toifa umumiy bozor hajmi.</div></div>
+<div class="card"><h2>Xarajatlar tuzilmasi</h2><div id="cst"></div></div>
+</section>
 
-      <!-- Jadval va Boshqaruv -->
-      <section class="table-container">
-        <div class="table-header">
-          <div class="filter-group">
-            <input type="text" class="search-input" id="searchInput" placeholder="Nomi bo‘yicha qidiruv...">
-            <select class="select-filter" id="typeFilter">
-              <option value="all">Barchasi</option>
-              <option value="in">Faqat Kirim</option>
-              <option value="out">Faqat Chiqim</option>
-            </select>
-          </div>
-          <div class="btn-group">
-            <button class="btn-export" id="exportBtn">📥 Excel (CSV)</button>
-            <button class="btn-add" id="openModalBtn">+ Yangi operatsiya</button>
-          </div>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Operatsiya nomi</th>
-              <th>Tur</th>
-              <th>Miqdor (so‘m)</th>
-              <th>Sana</th>
-              <th style="text-align: right;">Amallar</th>
-            </tr>
-          </thead>
-          <tbody id="transactionBody"></tbody>
-        </table>
-      </section>
-    </div>
-  </main>
+<section class="card" style="margin-top:12px"><h2>Kelajakdagi ehtiyoj: 2027 prognozi</h2>
+<div class="scroll"><table><thead><tr><th>Mahsulot</th><th class="r">2025</th><th class="r">2026</th><th class="r">Oʻsish</th><th class="r">2027 prognoz</th><th>Ehtiyoj</th></tr></thead><tbody id="fc"></tbody></table></div>
+<div class="note">Prognoz 2025–2026 oʻsish sur’atining 80% i davom etadi, degan faraz asosida hisoblangan.</div></section>
 
-  <!-- Modal -->
-  <div class="modal" id="modal">
-    <div class="modal-content">
-      <h3>Yangi operatsiya qo‘shish</h3>
-      <form id="transactionForm">
-        <div class="form-group">
-          <label>Nomi</label>
-          <input type="text" id="txName" required placeholder="Masalan: Server xarajati">
-        </div>
-        <div class="form-group">
-          <label>Turi</label>
-          <select id="txType">
-            <option value="in">Kirim (Daromad)</option>
-            <option value="out">Chiqim (Xarajat)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Miqdori (so‘m)</label>
-          <input type="number" id="txAmount" required placeholder="100000">
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="theme-toggle-btn" id="closeModalBtn">Bekor qilish</button>
-          <button type="submit" class="btn-add">Saqlash</button>
-        </div>
-      </form>
-    </div>
-  </div>
+<section class="grid two">
+<div class="card"><h2>Mijozlar fikri</h2><div id="fb"></div></div>
+<div class="card"><h2>Asosiy muammolar</h2><div id="iss"></div><div class="note">Har 100 ta fikrdan nechtasida muammo tilga olingan.</div></div>
+</section>
+</main>
+<script>
+const P=["Matolar","Kiyim-kechak","Quruq meva","Yogʻ-moy","Konserva"];
+const ISS=["Yetkazib berish kechikishi","Qadoq shikastlanishi","Narx baland","Sifat beqarorligi","Bojxona/hujjat kechikishi"];
+const C={
+UZ:{n:"Oʻzbekiston",mk:320,duty:0,lg:3,rt:4.5,rv:1240,is:[20,10,35,12,2],q:"Sifat yaxshi, lekin narxlar raqobatchilarnikidan biroz yuqori."},
+KZ:{n:"Qozogʻiston",mk:260,duty:2,lg:5,rt:4.4,rv:760,is:[28,12,25,10,18],q:"Yetkazib berish yaxshi, ammo chegarada hujjatlar kechikdi."},
+RU:{n:"Rossiya",mk:900,duty:5,lg:7,rt:4.1,rv:980,is:[30,14,20,18,34],q:"Partiya hujjat tufayli chegarada 6 kun turib qoldi."},
+TR:{n:"Turkiya",mk:410,duty:8,lg:8,rt:4.3,rv:540,is:[22,9,28,11,25],q:"Mahsulot sifati yaxshi, ayrim partiyalarda qadoq shikastlangan."},
+CN:{n:"Xitoy",mk:1500,duty:12,lg:11,rt:3.8,rv:310,is:[45,20,22,16,48],q:"Yetkazish juda uzoq, bojxona bilan narx qimmat chiqyapti."},
+DE:{n:"Germaniya",mk:700,duty:7,lg:10,rt:4.2,rv:420,is:[26,18,18,12,30],q:"Hujjat va sertifikatlar toʻliq boʻlsa, hamkorlikni kengaytiramiz."}};
+const S={UZ:[[18,19],[12,14],[6,6.5],[10,10.5],[5,5.2]],KZ:[[9,11],[7,9.5],[3,3.4],[4,4.2],[2.5,3.1]],RU:[[14,12],[11,9.5],[8,9.8],[6,5.5],[6,7.2]],
+TR:[[10,12.5],[4,4.6],[5,7],[2,2.1],[1,1.1]],CN:[[7,10],[1,1.5],[2,4.8],[.5,.9],[.4,.7]],DE:[[3,3.8],[5,7.5],[4,6.2],[.5,.6],[1.5,2.4]]};
+const W=[.07,.07,.08,.08,.085,.08,.08,.085,.09,.095,.09,.095],MN=["Yan","Fev","Mar","Apr","May","Iyun","Iyul","Avg","Sen","Okt","Noy","Dek"];
+const CS=[["Xom ashyo","xom"],["Ish haqi","ish"],["Bojxona toʻlovlari","boj"],["Logistika","log"],["Kommunal toʻlovlar","kom"],["Marketing va boshqa","bosh"]];
+const $=id=>document.getElementById(id),K=Object.keys(C);
+const f1=n=>n.toFixed(1).replace(".",","),m$=n=>f1(n)+" mln $",pc=n=>Math.round(n*100)+"%";
+const sum=a=>a.reduce((x,y)=>x+y,0);
+let sel="ALL";
 
-  <script>
-    
-    const defaultData = [
-      { id: 101, title: 'Mijoz to‘lovi (Loyixa A)', type: 'in', amount: 12500000, date: '2026-03-25' },
-      { id: 102, title: 'Server ijarasi', type: 'out', amount: 850000, date: '2026-03-26' },
-      { id: 103, title: 'Konsalting xizmati', type: 'in', amount: 4200000, date: '2026-03-27' },
-      { id: 104, title: 'Ofis interneti', type: 'out', amount: 450000, date: '2026-03-28' },
-    ];
+function calc(list){
+ const prod=P.map(()=>[0,0]),cost={xom:0,ish:0,boj:0,log:0,kom:0,bosh:0};let r25=0,r26=0,mk=0,rw=0,rs=0;const is=ISS.map(()=>0);
+ list.forEach(k=>{const c=C[k];let rev=0;S[k].forEach((v,i)=>{prod[i][0]+=v[0];prod[i][1]+=v[1];r25+=v[0];rev+=v[1]});
+  r26+=rev;mk+=c.mk;cost.xom+=.48*rev;cost.ish+=.16*rev;cost.boj+=c.duty/100*rev;cost.log+=c.lg/100*rev;cost.kom+=.033*rev;cost.bosh+=.06*rev;
+  rs+=c.rt*c.rv;rw+=c.rv;c.is.forEach((x,j)=>is[j]+=x*c.rv)});
+ const exp=sum(Object.values(cost));
+ return{r25,r26,prod,cost,exp,profit:r26-exp,margin:(r26-exp)/r26,mk,share:r26/mk,rating:rs/rw,is:is.map(x=>x/rw),rw};
+}
+const g=(v)=>v[1]/v[0]-1;
+const need=x=>x>=.2?["Yuqori","var(--in)"]:x>=.05?["Oʻrtacha","var(--amb)"]:["Past","var(--out)"];
 
-    let transactions = JSON.parse(localStorage.getItem('dashboard_txs')) || defaultData;
+function render(){
+ const list=sel==="ALL"?K:[sel],d=calc(list),all=calc(K);
+ $("sel").value=sel;
+ const gr=d.r26/d.r25-1,bd=d.cost.boj+d.cost.kom;
+ $("kpi").innerHTML=[["Tushum",m$(d.r26),(gr>=0?"+":"")+pc(gr)+" 2025 ga nisbatan",gr>=0?"in":"out"],
+ ["Jami xarajat",m$(d.exp),pc(d.exp/d.r26)+" tushumdan","" ],
+ ["Sof foyda",m$(d.profit),"Marja "+pc(d.margin),d.margin>=.15?"in":"out"],
+ ["Bojxona + kommunal",m$(bd),pc(bd/d.r26)+" tushumdan",""],
+ ["Mijoz bahosi",f1(d.rating)+" / 5",d.rw.toLocaleString("ru-RU")+" ta fikr",d.rating>=4.2?"in":"out"]]
+ .map(k=>`<div class="card"><div class="lbl">${k[0]}</div><div class="big">${k[1]}</div><div class="lbl ${k[3]}">${k[2]}</div></div>`).join("");
+ monthly(d);
+ const mx=Math.max(...K.map(k=>calc([k]).r26));
+ $("cty").innerHTML=K.map(k=>{const s=calc([k]);return`<button class="rb ${sel===k?"on":""}" onclick="pick('${k}')"><div class="row"><span class="nm">${C[k].n}</span><span>${m$(s.r26)} · marja ${pc(s.margin)}</span></div><div class="bar"><i style="width:${s.r26/mx*100}%"></i></div></button>`}).join("")
+  +(sel!=="ALL"?'<button onclick="pick(\'ALL\')">Barcha davlatlar</button>':"");
+ const pm=Math.max(...d.prod.map(v=>v[1]));
+ $("prd").innerHTML=P.map((p,i)=>`<div class="row"><span>${p}</span><span>${m$(d.prod[i][1])} · ${pc(d.prod[i][1]/d.r26)}</span></div><div class="bar"><i style="width:${d.prod[i][1]/pm*100}%"></i></div>`).join("");
+ const sm=Math.max(...K.map(k=>calc([k]).share));
+ $("shr").innerHTML=list.map(k=>{const s=calc([k]);return`<div class="row"><span>${C[k].n}</span><span>${f1(s.share*100)}% <span class="lbl">(bozor ${C[k].mk} mln $)</span></span></div><div class="bar"><i class="a" style="width:${s.share/sm*100}%"></i></div>`}).join("")
+  +(list.length>1?`<div class="row"><b>Oʻrtacha ulush</b><b>${f1(d.share*100)}%</b></div>`:"");
+ $("cst").innerHTML=CS.map(([n,k])=>`<div class="row"><span>${n}</span><span>${m$(d.cost[k])} · ${pc(d.cost[k]/d.r26)}</span></div><div class="bar"><i class="${k==="boj"||k==="kom"?"o":""}" style="width:${d.cost[k]/d.exp*100}%"></i></div>`).join("")
+  +`<div class="row"><b>Jami</b><b>${m$(d.exp)}</b></div><div class="note">Qizil chiziqlar — bojxona va kommunal toʻlovlar.</div>`;
+ $("fc").innerHTML=P.map((p,i)=>{const v=d.prod[i],x=g(v),f=v[1]*(1+x*.8),n=need(x);
+  return`<tr><td>${p}</td><td class="r">${f1(v[0])}</td><td class="r">${f1(v[1])}</td><td class="r ${x>=0?"in":"out"}">${x>=0?"+":""}${pc(x)}</td><td class="r"><b>${f1(f)}</b></td><td><span class="tag" style="color:${n[1]}">${n[0]}</span></td></tr>`}).join("");
+ const lows=[...list].sort((a,b)=>C[a].rt-C[b].rt).slice(0,3);
+ $("fb").innerHTML=`<div class="big">${"★".repeat(Math.round(d.rating))}<span class="lbl">${"★".repeat(5-Math.round(d.rating))}</span> ${f1(d.rating)}</div><p class="lbl">${d.rw.toLocaleString("ru-RU")} ta fikr asosida</p>`
+  +(list.length>1?"<div class='lbl' style='margin-bottom:6px'>Bahosi eng past davlatlar:</div>":"")
+  +lows.map(k=>`<p class="q">“${C[k].q}” — ${C[k].n}, ${f1(C[k].rt)}/5</p>`).join("");
+ const im=Math.max(...d.is);
+ $("iss").innerHTML=ISS.map((n,j)=>`<div class="row"><span>${n}</span><span>${Math.round(d.is[j])}</span></div><div class="bar"><i class="${d.is[j]>=im*.8?"o":""}" style="width:${d.is[j]/im*100}%"></i></div>`).join("");
+ $("ai").innerHTML=ins(list,d,all).map(t=>`<p class="tip ${t[0]}">${t[1]}</p>`).join("");
+}
 
-    function saveTransactions() {
-      localStorage.setItem('dashboard_txs', JSON.stringify(transactions));
-    }
+function monthly(d){
+ const H=220,pl=4,pb=24,pt=10,Wt=520,bw=(Wt-pl*2)/12;
+ const rv=W.map(w=>d.r26*w),ex=W.map(w=>d.exp*(w*.7+.3/12)),mx=Math.max(...rv);
+ const y=v=>H-pb-(H-pb-pt)*v/mx;
+ let s=`<svg viewBox="0 0 ${Wt} ${H}" role="img" aria-label="Oylik tushum, xarajat va foyda"><line x1="0" x2="${Wt}" y1="${H-pb}" y2="${H-pb}" stroke="var(--line)"/>`;
+ const pts=[];
+ rv.forEach((v,i)=>{const x=pl+i*bw,w=bw*.32;
+  s+=`<rect x="${x+bw*.12}" y="${y(v)}" width="${w}" height="${H-pb-y(v)}" rx="2" fill="var(--in)"/><rect x="${x+bw*.12+w+1}" y="${y(ex[i])}" width="${w}" height="${H-pb-y(ex[i])}" rx="2" fill="var(--out)"/>`;
+  s+=`<text x="${x+bw/2}" y="${H-7}" text-anchor="middle" font-size="11" fill="var(--mute)">${MN[i]}</text>`;pts.push((x+bw/2)+","+y(v-ex[i]))});
+ $("mon").innerHTML=s+`<polyline points="${pts.join(" ")}" fill="none" stroke="var(--amb)" stroke-width="2.5"/>`+pts.map(p=>`<circle cx="${p.split(",")[0]}" cy="${p.split(",")[1]}" r="3" fill="var(--amb)"/>`).join("")+"</svg>";
+}
 
-   
-    const themeBtn = document.getElementById('themeToggleBtn');
-    let currentTheme = localStorage.getItem('dashboard_theme') || 'light';
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    themeBtn.textContent = currentTheme === 'dark' ? '☀️ Kunduzgi rejim' : '🌙 Tungi rejim';
+function ins(list,d,all){
+ const a=[],ti=d.is.indexOf(Math.max(...d.is));
+ const best=P.map((p,i)=>[i,g(d.prod[i])]).sort((x,y)=>y[1]-x[1])[0];
+ if(list.length>1){
+  const cs=K.map(k=>({k,...calc([k])})).sort((x,y)=>y.margin-x.margin),b=cs[0],w=cs[cs.length-1];
+  a.push(["g",`Korxonaning umumiy foyda marjasi ${pc(d.margin)} (${m$(d.profit)}). Eng daromadli bozor — ${C[b.k].n}: marja ${pc(b.margin)}.`]);
+  a.push(["w",`${C[w.k].n}da marja atigi ${pc(w.margin)}: bojxona ${C[w.k].duty}% va logistika ${C[w.k].lg}% tushumni yeb qo‘ymoqda`+(w.r26/w.r25>1.2?`, tushum esa ${pc(w.r26/w.r25-1)} oʻsgan. Oʻsish bor, foyda yoʻq: mahalliy ombor yoki imtiyozli savdo bitimini koʻrib chiqing.`:". Narx yoki yetkazish sxemasini qayta koʻring.")]);
+  a.push(["",`Bojxona va kommunal toʻlovlari birgalikda ${m$(d.cost.boj+d.cost.kom)} — jami xarajatning ${pc((d.cost.boj+d.cost.kom)/d.exp)} i. Eng koʻp bojxona toʻlanadigan davlat: ${C[[...K].sort((x,y)=>C[y].duty*S[y].reduce((q,v)=>q+v[1],0)-C[x].duty*S[x].reduce((q,v)=>q+v[1],0))[0]].n}.`]);
+  const big=K.filter(k=>C[k].mk>=700).sort((x,y)=>calc([x]).share-calc([y]).share)[0];
+  a.push(["",`Katta bozor, kichik ulush: ${C[big].n} (bozor ${C[big].mk} mln $, ulush ${f1(calc([big]).share*100)}%). Ulushni 1 punkt oshirish ≈ ${m$(C[big].mk*.01)} qoʻshimcha tushum beradi.`]);
+  const dec=[];K.forEach(k=>S[k].forEach((v,i)=>{if(g(v)<-.05)dec.push([C[k].n,P[i],g(v)])}));
+  dec.sort((x,y)=>x[2]-y[2]).slice(0,2).forEach(z=>a.push(["w",`${z[0]}da “${z[1]}” sotuvi ${pc(-z[2])} kamaydi. Sababini (narx, raqobat, sifat) aniqlang.`]));
+ }else{
+  const k=list[0],c=C[k];
+  a.push([d.margin>=all.margin?"g":"w",`${c.n}da foyda marjasi ${pc(d.margin)} — korxona oʻrtachasidan (${pc(all.margin)}) ${d.margin>=all.margin?"yuqori":"past"}. Sof foyda: ${m$(d.profit)}.`]);
+  a.push([c.duty>=5||c.lg>=8?"w":"g",c.duty>=5||c.lg>=8?`Bojxona (${c.duty}%) va logistika (${c.lg}%) tushumning ${pc((d.cost.boj+d.cost.log)/d.r26)} ini oladi. Mahalliy ombor yoki bojxona imtiyozlari xarajatni kamaytirishi mumkin.`:`Bojxona (${c.duty}%) va logistika (${c.lg}%) yuki past — bu bozor foydali va barqaror.`]);
+  const dec=P.map((p,i)=>[p,g(d.prod[i])]).filter(z=>z[1]<-.05);
+  dec.forEach(z=>a.push(["w",`“${z[0]}” sotuvi ${pc(-z[1])} kamaydi. Ishlab chiqarishni qisqartirish yoki narxni qayta koʻrish kerak.`]));
+  a.push(["",`Bozor hajmi ${c.mk} mln $, korxona ulushi ${f1(d.share*100)}%. Ulushni 1 punkt oshirish ≈ ${m$(c.mk*.01)} tushum.`]);
+ }
+ a.push(["g",`Eng tez oʻsayotgan mahsulot: “${P[best[0]]}” (${best[1]>=0?"+":""}${pc(best[1])}). 2027 uchun prognoz: ${m$(d.prod[best[0]][1]*(1+best[1]*.8))}. Ishlab chiqarish quvvatini shunga moslang.`]);
+ a.push([d.rating<4.2?"w":"",`Mijozlarning asosiy shikoyati: “${ISS[ti]}” (har 100 fikrdan ${Math.round(d.is[ti])} tasida). Bahosi ${f1(d.rating)}/5${d.is[4]>=25?"; hujjat va bojxona kechikishi savdoga zarar qilmoqda — hujjatlarni oldindan tayyorlang":""}.`]);
+ return a;
+}
+function pick(k){sel=k;render()}
+$("sel").innerHTML='<option value="ALL">Barcha davlatlar</option>'+K.map(k=>`<option value="${k}">${C[k].n}</option>`).join("");
+$("sel").onchange=e=>pick(e.target.value);
 
-    themeBtn.addEventListener('click', () => {
-      currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', currentTheme);
-      localStorage.setItem('dashboard_theme', currentTheme);
-      themeBtn.textContent = currentTheme === 'dark' ? '☀️ Kunduzgi rejim' : '🌙 Tungi rejim';
-    });
-
-   
-    const ctxBar = document.getElementById('barChart').getContext('2d');
-    const barChart = new Chart(ctxBar, {
-      type: 'bar',
-      data: {
-        labels: ['Jami Statistika'],
-        datasets: [
-          { label: 'Kirim', data: [0], backgroundColor: '#10b981' },
-          { label: 'Chiqim', data: [0], backgroundColor: '#ef4444' }
-        ]
-      },
-      options: { responsive: true }
-    });
-
-    const ctxPie = document.getElementById('pieChart').getContext('2d');
-    const pieChart = new Chart(ctxPie, {
-      type: 'doughnut',
-      data: {
-        labels: ['Kirim', 'Chiqim'],
-        datasets: [{
-          data: [1, 1],
-          backgroundColor:['#10b981', '#ef4444']
-          }]
- },
-      options: { responsive: true }
-    });
-
-    // 4. DELETE FUNCTION
-    function deleteTransaction(id) {
-      if (confirm("Haqiqatan ham bu operatsiyani o‘chirmoqchimisiz?")) {
-        transactions = transactions.filter(t => t.id !== id);
-        saveTransactions();
-        applyFilterAndRender();
-      }
-    }
-
-    // 5. RENDER APP
-    function renderTable(items) {
-      const tbody = document.getElementById('transactionBody');
-      tbody.innerHTML = '';
-
-      if (items.length === 0) {
-        tbody.innerHTML = <tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Ma'lumot topilmadi</td></tr>;
-        return;
-      }
-
-      items.forEach(tx => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>#${tx.id}</td>
-          <td>${tx.title}</td>
-          <td><span class="badge ${tx.type === 'in' ? 'badge-in' : 'badge-out'}">${tx.type === 'in' ? 'Kirim' : 'Chiqim'}</span></td>
-          <td style="font-weight: 600;">${tx.amount.toLocaleString()} so‘m</td>
-          <td>${tx.date}</td>
-          <td style="text-align: right;">
-            <button class="btn-delete" onclick="deleteTransaction(${tx.id})">O‘chirish</button>
-          </td>
-       ` ;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function updateKPIAndCharts() {
-      let totalIn = 0;
-      let totalOut = 0;
-
-      transactions.forEach(t => {
-        if (t.type === 'in') totalIn += t.amount;
-        if (t.type === 'out') totalOut += t.amount;
-      });
-
-      document.getElementById('kpiIncome').textContent = totalIn.toLocaleString() + " so‘m";
-      document.getElementById('kpiExpense').textContent = totalOut.toLocaleString() + " so‘m";
-      const net = totalIn - totalOut;
-      const profitEl = document.getElementById('kpiProfit');
-      profitEl.textContent = net.toLocaleString() + " so‘m";
-      profitEl.className = 'card-value ' + (net >= 0 ? 'text-success' : 'text-danger');
-      document.getElementById('kpiCount').textContent = transactions.length + " ta";
-
-
-      pieChart.data.datasets[0].data = [totalIn,totalOut];
-      pieChart.update();
-
-      barChart.data.datasets[0].data = [totalIn];
-      barChart.data.datasets[1].data = [totalOut];
-      barChart.update();
-    }
-
-    function applyFilterAndRender() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const type = document.getElementById('typeFilter').value;
-
-      const filtered = transactions.filter(t => {
-        const matchesSearch = t.title.toLowerCase().includes(search);
-        const matchesType = (type === 'all') || (t.type === type);
-        return matchesSearch && matchesType;
-      });
-
-      renderTable(filtered);
-      updateKPIAndCharts();
-    }
-
-    // 6. EVENTS (SEARCH, FILTER, EXPORT)
-    document.getElementById('searchInput').addEventListener('input', applyFilterAndRender);
-    document.getElementById('typeFilter').addEventListener('change', applyFilterAndRender);
-
-    // CSV Eksport
-    document.getElementById('exportBtn').addEventListener('click', () => {
-      let csv = 'ID,Nomi,Turi,Miqdori,Sana\n';
-      transactions.forEach(t => {
-        csv += `${t.id},"${t.title}",${t.type === 'in' ? 'Kirim' : 'Chiqim'},${t.amount},${t.date}\n`;
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `tahlil_hisobot_${new Date().toISOString().split('T')[0]}.csv`;
-      link.click();
-    });
-
-    // 7. MODAL LOGIC
-    const modal = document.getElementById('modal');
-    const openBtn = document.getElementById('openModalBtn');
-    const closeBtn = document.getElementById('closeModalBtn');
-    const form = document.getElementById('transactionForm');
-
-    openBtn.onclick = () => modal.classList.add('active');
-    closeBtn.onclick = () => modal.classList.remove('active');
-
-    form.onsubmit = (e) => {
-      e.preventDefault();
-      const title = document.getElementById('txName').value;
-      const type = document.getElementById('txType').value;
-      const amount = parseFloat(document.getElementById('txAmount').value);
-      const date = new Date().toISOString().split('T')[0];
-
-      const newTx = {
-        id: Math.floor(100 + Math.random() * 900),
-        title,
-        type,
-        amount,
-        date
-      };
-
-      transactions.unshift(newTx);
-      saveTransactions();
-      applyFilterAndRender();
-
-      form.reset();
-      modal.classList.remove('active');
-    };
-
-    // Boshlang'ich render
-    applyFilterAndRender();
-  </script>
+/* ===== Kirish / roʻyxatdan oʻtish (demo, brauzerda) ===== */
+const AK="korxona-users-v1",SK="korxona-session-v1";
+let users={};try{users=JSON.parse(localStorage.getItem(AK)||"{}")}catch(e){}
+const saveU=()=>{try{localStorage.setItem(AK,JSON.stringify(users))}catch(e){}};
+const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+async function hash(pw,salt){const enc=new TextEncoder(),k=await crypto.subtle.importKey("raw",enc.encode(pw),"PBKDF2",false,["deriveBits"]);
+ return hex(await crypto.subtle.deriveBits({name:"PBKDF2",salt:enc.encode(salt),iterations:100000,hash:"SHA-256"},k,256))}
+let mode="in";
+function setMode(m){mode=m;$("tIn").classList.toggle("on",m==="in");$("tUp").classList.toggle("on",m==="up");
+ document.querySelectorAll(".up").forEach(x=>x.hidden=m==="in");$("asub").textContent=m==="in"?"Kirish":"Hisob yaratish";$("amsg").textContent=""}
+function enter(l){$("auth").hidden=true;$("app").hidden=false;$("cname").textContent=users[l].company+" — tahlil paneli";document.title=users[l].company+" — tahlil paneli";
+ try{sessionStorage.setItem(SK,l)}catch(e){}sel="ALL";render()}
+function logout(){try{sessionStorage.removeItem(SK)}catch(e){}$("app").hidden=true;$("auth").hidden=false;$("af").reset();setMode("in")}
+$("af").onsubmit=async e=>{e.preventDefault();const m=$("amsg"),l=$("al").value.trim().toLowerCase(),p=$("ap").value;m.textContent="";
+ try{
+  if(mode==="up"){const n=$("an").value.trim();
+   if(n.length<2){m.textContent="Korxona nomini kiriting.";return}
+   if(!/^[a-z0-9_.]{3,}$/.test(l)){m.textContent="Login: kamida 3 ta lotin harfi, raqam, nuqta yoki pastki chiziq.";return}
+   if(p.length<6){m.textContent="Parol kamida 6 belgidan iborat boʻlsin.";return}
+   if(p!==$("ap2").value){m.textContent="Parollar bir xil emas.";return}
+   if(users[l]){m.textContent="Bu login band. Boshqasini tanlang.";return}
+   const salt=hex(crypto.getRandomValues(new Uint8Array(16)));
+   users[l]={company:n,salt,h:await hash(p,salt)};saveU();enter(l);
+  }else{const u=users[l];
+   if(!u||u.h!==await hash(p,u.salt)){m.textContent="Login yoki parol notoʻgʻri.";return}
+   enter(l)}
+ }catch(err){m.textContent="Xavfsizlik funksiyasi ishlamadi. Sahifani https orqali oching."}};
+setMode("in");
+try{const s=sessionStorage.getItem(SK);if(s&&users[s])enter(s)}catch(e){}
+</script>
 </body>
 </html>
